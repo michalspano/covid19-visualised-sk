@@ -1,0 +1,62 @@
+/* Global Style for index.html */
+
+/* Global var colors */
+:root {
+    --color-primary: teal;
+}
+
+h1, p {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Graph selector class with a scrollable vertical nav. bar 
+*
+* Vertical scrollbar: https://stackoverflow.com/a/54433539
+* Scalable & dynamic graphs
+* 
+*/
+
+.graph-projection {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.centered {
+    text-align: center;
+}
+
+/* Make a href colorless */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+input {
+    border: none;
+    background-color: transparent;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+details {
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: black;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: bold;
+    opacity: 0.75;
+
+    transition: opacity 0.5s;
+}
+
+details:hover {
+    opacity: 1;
+    transition: opacity 0.5s;
+}
