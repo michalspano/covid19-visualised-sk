@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<head>
+    <!-- Links -->
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="shortcut icon" href="static/favicon.ico">
+
+    <!-- Compatibilities -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title -->
+    <title>Covid-19 Projection</title>
+
+</head>
+<body>
+    <!-- ==== Header ===== -->
+    <header class="centered">
+        <h1>COVID-19 Projection in the Slovak republic | &#127480;&#127472; </h1><hr><br>
+    </header>
+
+    <!-- ==== Body ===== -->
+    <div class="graph-projection">
+        <div style="width: 3000px; height: 500px">
+            <canvas id="vaccinationGraph" height="500" width="0"></canvas>
+        </div>
+    </div>
+
+    <!-- INDEX -->
+    <br>
+    <details>
+        <summary>
+            List of all graphs
+        </summary>    
+        <form action="/" method="get" type="submit">
+            <input type="submit" value="Vaccination">
+        </form>
+        <form action="/foo" method="get" type="submit">
+            <input type="submit" value="Hospitals">
+        </form>
+        <form action="/bar" method="get" type="submit">
+            <input type="submit" value="Occupied">
+        </form>
+        <form action="/baz" method="get" type="submit">
+            <input type="submit" value="AG tests">
+        </form>
+        <form action="/doctor" method="get" type="submit">
+            <input type="submit" value="Hospital staff">
+        </form>
+    </details>
+    
+    <!-- ==== Footer ===== -->
+    <footer class="centered">
+        <br><hr>
+        <p>
+            &copy; 2022 <a href="https://github.com/michalspano">@michalspano</a> | 
+            <a href="https://data.korona.gov.sk/">API</a>
+        </p>
+    </footer>
+    <script type="text/javascript">
+
+        // Function to generate random RGB color
+        function generateRandomRgb(min, max) {
+            return 'rgb(' + Math.floor(Math.random() * (max - min + 1) + min) + ', ' + Math.floor(Math.random() * (max - min + 1) + min) + ', ' + Math.floor(Math.random() * (max - min + 1) + min) + ')';
+        }
+
+        // Parse data from Flask app
+        const parsedData = JSON.parse('{{ data|tojson }}');
+        const ctx = JSON.parse('{{ keys|tojson }}');
+
+        function getKeyData(value) {
+            buff = [];
+            for (const key in parsedData) {
+                const item = parsedData[key];
+                let val = item[value];
+                if (typeof val === 'number') {
+                    val = Math.abs(val);
+                }
+                buff.push(val);
+            }
+            return buff;
+        }
+
+        let dates = getKeyData('published_on');
+
+        /* Getting the number of entries [deprecated]
+        * let numberOfEntries = Object.keys(parsedData).length;
+        */ 
+
+        // Create new Object type Chart
+        new Chart("vaccinationGraph", {
+            type: "line",
+            data: {
+                labels: dates,
+                datasets: [{
+                    fill: false,
+                    data: getKeyData(ctx[0][0]),
+                    lineTension: 0.1,
+                    borderColor: generateRandomRgb(50, 200),
+                    label: ctx[0][1]
+
+                }, {
+                    fill: false,
+                    data: getKeyData(ctx[1][0]),
+                    lineTension: 0.1,
+                    borderColor: generateRandomRgb(50, 200),
+                    label: ctx[1][1]
+                }]
+        },
+
+        options: {
+            // Clickable option - click to disable the graph and vice versa
+            legend: {
+                display: true
+            },
+
+            scales: {
+                xAxes: [{ticks: {
+                    callback: function(value, index, values) {
+                        // Format the date from 'YYYY-MM-DD' to 'DD.MM.YYYY'
+                        return value.split('-').reverse().join('.');
+                    }
+                }}],
+                yAxes: [{ticks: {
+                    callback: function(value, index, values) {
+                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    }
+                }}],
+            }
+        }
+    });
+
+    </script>
+</body>
+</html>
