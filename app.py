@@ -1,90 +1,66 @@
 #!/usr/bin/env python3
 
-# TODO: Polish the code
-
 import json
-import requests
+from requests import get
 from flask import Flask, render_template, redirect, request
 
 
+# Create a Flask app
 app = Flask(__name__)
 
 
-# Routes
-# TODO: Add multiple routes and handle them
-# Hint: `request.url_rule`
+# Accepted routes and their associated data
 @app.route("/")
-def index():
-    url: str = 'https://data.korona.gov.sk/api/vaccinations/in-slovakia'
-    fetched_session = fetch(url)
-    if not fetched_session:
-        return render_template('error.html')
-    return render_template('index.html', data=fetched_session,
-                        keys = [
-                            ["dose1_count", "Daily Increase - First Dose"], 
-                            ["dose2_count", "Daily Increase - Second Dose"],
-                        ])
-
-# TODO: get rid of foo, bar, baz etc.
 @app.route("/foo")
-def foo():
-    url: str = 'https://data.korona.gov.sk/api/hospital-patients/in-slovakia'
-    fetched_session = fetch(url)
-    if not fetched_session:
-        return render_template('error.html')
-    return render_template("index.html", data=fetched_session, 
-    keys=[["non_covid", "Non-covid"], 
-    ["confirmed_covid", "Confirmed Covid"]])
-
-
 @app.route("/bar")
-def bar():
-    url: str = 'https://data.korona.gov.sk/api/hospital-beds/in-slovakia'
-
-    fetched_session = fetch(url)
-    if not fetched_session:
-        return render_template('error.html')
-    return render_template("index.html", data=fetched_session, 
-                           keys=[["occupied_oaim_covid", "Occupied OAIM - Covid"],
-                                 ["occupied_jis_covid", "Occupied by JIS Covid"]
-                            ])
-
-
 @app.route("/baz")
-def baz():
-    url: str = 'https://data.korona.gov.sk/api/ag-tests/in-slovakia'
-
-    fetched_session = fetch(url)
-    if not fetched_session:
-        return render_template('error.html')
-    return render_template("index.html", data=fetched_session,
-                           keys=[["positives_sum", "Positive Test Rate"],
-                                 ["negatives_sum", "Negative Tests"]
-                            ])
-
-
 @app.route("/doctor")
-def doctor():
-    url: str = 'https://data.korona.gov.sk/api/hospital-staff'
+def index():
+    # TODO: remove foo, bar, baz and other exemplary routes
 
-    fetched_session = fetch(url)
+    """
+    Current supported routes:
+    / | /foo | /bar | /baz | /doctor 
+    """
+
+    # Load credentials
+    credentials: dict = load_JSON_credentials('static/credentials.json')
+
+    # Create route specific data
+    route_specific_credentials: dict = credentials[request.url_rule.rule]
+
+    # Fetch data from the API 
+    fetched_session = fetch(route_specific_credentials['URL'])
+
+    # Check response
     if not fetched_session:
-        return render_template('error.html')
-    return render_template("index.html", data=fetched_session,
-                           keys=[["out_of_work_ratio_doctor", "Doctors out of work"],
-                                 ["out_of_work_ratio_nurse", "Nurses out of work"]
-                            ])
+        return render_template('error.html', error='API error')
+
+    # Render the template
+    return render_template('index.html', data=fetched_session, keys=[
+        [
+            route_specific_credentials['graph1']['key'], 
+            route_specific_credentials['graph1']['description']
+        ],
+
+        [
+            route_specific_credentials['graph2']['key'], 
+            route_specific_credentials['graph2']['description']
+        ],
+    ])
 
 
 # Fetch data from the API
 def fetch(URL: str):
     """Contact the API"""
 
+    # Handle API errors requests
     try:
-        response = requests.get(URL)
+        response = get(URL)
     except requests.RequestException:
         return None
 
+    # Handle response possible errors
     try:
         raw = response.json()['page']
     except (json.JSONDecodeError, KeyError):
@@ -92,14 +68,23 @@ def fetch(URL: str):
 
     data: dict = {}
 
+    # Parse the data to a dictionary of dictionaries
+    # Handle possible key errors
     try:
         for item in raw:
             data[item['id']] = item
     except KeyError:
         return None
 
+    # Return parsed data
     return data
 
 
+def load_JSON_credentials(path: 'static/credentials.json') -> dict:
+    """Load credentials from a JSON file"""
+    return json.load(open(path))
+
+
 if __name__ == '__main__':
+    # TODO: get rid of the debug operand
     app.run(debug=True)
