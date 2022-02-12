@@ -29,20 +29,20 @@
         </div>
     </div>
 
-    <!-- INDEX -->
+    <!-- ==== INDEX ==== -->
     <br>
     <details>
         <summary>
-            List of all graphs
+            List of Graphs
         </summary>    
         <form action="/" method="get" type="submit">
             <input type="submit" value="Vaccination">
         </form>
         <form action="/foo" method="get" type="submit">
-            <input type="submit" value="Hospitals">
+            <input type="submit" value="Hospital capacity">
         </form>
         <form action="/bar" method="get" type="submit">
-            <input type="submit" value="Occupied">
+            <input type="submit" value="Occupied places">
         </form>
         <form action="/baz" method="get" type="submit">
             <input type="submit" value="AG tests">
@@ -60,17 +60,22 @@
             <a href="https://data.korona.gov.sk/">API</a>
         </p>
     </footer>
+
     <script type="text/javascript">
 
-        // Function to generate random RGB color
+        // Function to generate a random RGB color with a desired interval within <min;max>
         function generateRandomRgb(min, max) {
-            return 'rgb(' + Math.floor(Math.random() * (max - min + 1) + min) + ', ' + Math.floor(Math.random() * (max - min + 1) + min) + ', ' + Math.floor(Math.random() * (max - min + 1) + min) + ')';
+            return 'rgb(' 
+            + Math.floor(Math.random() * (max - min + 1) + min) + ', ' 
+            + Math.floor(Math.random() * (max - min + 1) + min) + ', '
+            + Math.floor(Math.random() * (max - min + 1) + min) + ')';
         }
 
-        // Parse data from Flask app
+        // Parse JSON data from Flask in Jinja2
         const parsedData = JSON.parse('{{ data|tojson }}');
         const ctx = JSON.parse('{{ keys|tojson }}');
 
+        // Get list of data of a specific key from the parsed JSON Object
         function getKeyData(value) {
             buff = [];
             for (const key in parsedData) {
@@ -84,17 +89,11 @@
             return buff;
         }
 
-        let dates = getKeyData('published_on');
-
-        /* Getting the number of entries [deprecated]
-        * let numberOfEntries = Object.keys(parsedData).length;
-        */ 
-
         // Create new Object type Chart
         new Chart("vaccinationGraph", {
             type: "line",
             data: {
-                labels: dates,
+                labels: getKeyData('published_on'),
                 datasets: [{
                     fill: false,
                     data: getKeyData(ctx[0][0]),
@@ -126,6 +125,7 @@
                 }}],
                 yAxes: [{ticks: {
                     callback: function(value, index, values) {
+                        // Separate with a comma after each 1000, for brevity
                         return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                     }
                 }}],
