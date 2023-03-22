@@ -10,7 +10,7 @@ As of now, the website's __hosting__ is __not__ available due to __Heroku__'s ne
 
 ### (Static) Demo
 
-<img src="static/images/demo.png" width="750px" height="auto"/>
+![Static Website's demo](static/images/demo.png)
 
 ### Running the website locally
 
