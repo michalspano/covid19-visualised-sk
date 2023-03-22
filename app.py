@@ -23,14 +23,14 @@ def index():
     / | /foo | /bar | /baz | /doctor 
     """
 
-    # Load credentials
-    credentials: dict = load_JSON_credentials('static/credentials.json')
+    # Load the API details
+    api: dict = load_JSON_API('static/api.json')
 
     # Create route specific data
-    route_specific_credentials: dict = credentials[request.url_rule.rule]
+    route_specific_api: dict = api[request.url_rule.rule]
 
     # Fetch data from the API 
-    fetched_session = fetch(route_specific_credentials['URL'])
+    fetched_session = fetch(route_specific_api['URL'])
 
     # Check response
     if not fetched_session:
@@ -39,13 +39,13 @@ def index():
     # Render the template
     return render_template('index.html', data=fetched_session, keys=[
         [
-            route_specific_credentials['graph1']['key'], 
-            route_specific_credentials['graph1']['description']
+            route_specific_api['graph1']['key'], 
+            route_specific_api['graph1']['description']
         ],
 
         [
-            route_specific_credentials['graph2']['key'], 
-            route_specific_credentials['graph2']['description']
+            route_specific_api['graph2']['key'], 
+            route_specific_api['graph2']['description']
         ],
     ])
 
@@ -80,8 +80,8 @@ def fetch(URL: str):
     return data
 
 
-def load_JSON_credentials(path: 'static/credentials.json') -> dict:
-    """Load credentials from a JSON file"""
+def load_JSON_API(path: str) -> dict:
+    """Load API from a JSON file"""
     return json.load(open(path))
 
 
